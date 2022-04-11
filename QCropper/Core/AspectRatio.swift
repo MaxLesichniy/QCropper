@@ -6,13 +6,30 @@
 
 import Foundation
 
-public enum AspectRatio {
+public enum AspectRatioOrientation: Hashable {
+    case any
+    case vertical
+    case horizontal
+    
+    public var rotated: AspectRatioOrientation {
+        switch self {
+        case .vertical:
+            return .horizontal
+        case .horizontal:
+            return .vertical
+        default:
+            return self
+        }
+    }
+}
+
+public enum AspectRatio: Hashable {
     case original
     case freeForm
     case square
     case ratio(width: Int, height: Int)
 
-    var rotated: AspectRatio {
+    public var rotated: AspectRatio {
         switch self {
         case let .ratio(width, height):
             return .ratio(width: height, height: width)
@@ -21,6 +38,25 @@ public enum AspectRatio {
         }
     }
 
+    public var orientation: AspectRatioOrientation {
+        switch self {
+        case let .ratio(width, height) where width > height:
+            return .horizontal
+        case let .ratio(width, height) where width < height:
+            return .vertical
+        default:
+            return .any
+        }
+    }
+    
+    public func withOrientation(_ orientation: AspectRatioOrientation) -> AspectRatio {
+        if orientation != self.orientation {
+            return rotated
+        } else {
+            return self
+        }
+    }
+    
     var description: String {
         switch self {
         case .original:

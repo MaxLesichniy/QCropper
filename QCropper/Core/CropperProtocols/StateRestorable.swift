@@ -52,6 +52,9 @@ extension StateRestorable where Self: CropperViewController {
                               scrollViewMaximumZoomScale: scrollView.maximumZoomScale,
                               scrollViewZoomScale: scrollView.zoomScale,
                               cropBoxFrame: overlay.cropBoxFrame,
+                              aspectRatioLocked: aspectRatioLocked,
+                              aspectRatio: currentAspectRatio,
+                              aspectRatioValue: currentAspectRatioValue,
                               photoTranslation: photoTranslation(),
                               imageViewTransform: imageView.transform,
                               imageViewBoundsSize: imageView.bounds.size)
@@ -86,7 +89,8 @@ extension StateRestorable where Self: CropperViewController {
             self.aspectRatioPicker.selectedAspectRatio = .freeForm
             self.angleRuler.value = state.straightenAngle * 180 / CGFloat.pi
             // No need restore
-            //            self.currentAspectRatioValue = state.currentAspectRatioValue
+            self.currentAspectRatioValue = state.aspectRatioValue
+            self.currentAspectRatio = state.aspectRatio
             //            self.photoTranslation() = state.photoTranslation
             //            self.imageView.transform = state.imageViewTransform
             //            self.imageView.bounds.size = state.imageViewBoundsSize

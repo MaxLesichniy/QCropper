@@ -89,9 +89,7 @@ open class Overlay: UIView {
     public lazy var translucentMaskView: UIVisualEffectView = {
         let vev = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
         vev.backgroundColor = .clear
-        vev.frame = self.bounds
         vev.isUserInteractionEnabled = false
-        vev.autoresizingMask = [.flexibleTopMargin, .flexibleLeftMargin, .flexibleRightMargin, .flexibleBottomMargin, .flexibleHeight, .flexibleWidth]
         return vev
     }()
 
@@ -121,7 +119,9 @@ open class Overlay: UIView {
             cropBox.layer.cornerRadius = 0
             cropBox.layer.masksToBounds = false
         }
-
+        
+        translucentMaskView.frame = bounds
+        
         var maskLayer: CAShapeLayer
         if let ml = translucentMaskView.layer.mask as? CAShapeLayer {
             maskLayer = ml

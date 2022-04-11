@@ -62,7 +62,7 @@ class IconButton: UIButton {
     init(_ iconName: String) {
         super.init(frame: CGRect(center: .zero, size: CGSize(width: 44, height: 44)))
 
-        let image = UIImage(named: iconName, in: QCropper.Config.resourceBundle, compatibleWith: nil)?.withRenderingMode(.alwaysTemplate)
+        let image = UIImage(named: iconName, in: QCropperConfig.resourceBundle, compatibleWith: nil)?.withRenderingMode(.alwaysTemplate)
         setImage(image, for: .normal)
         tintColor = UIColor(white: 0.725, alpha: 1)
     }
@@ -74,7 +74,7 @@ class IconButton: UIButton {
     override var isSelected: Bool {
         didSet {
             if isSelected {
-                tintColor = QCropper.Config.highlightColor
+                tintColor = QCropperConfig.highlightColor
             } else {
                 tintColor = UIColor(white: 0.725, alpha: 1)
             }

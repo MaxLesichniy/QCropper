@@ -7,25 +7,25 @@
 import UIKit
 
 /// To restore cropper state
-public struct CropperState: Codable {
-    var viewFrame: CGRect
-    var angle: CGFloat
-    var rotationAngle: CGFloat
-    var straightenAngle: CGFloat
-    var flipAngle: CGFloat
-    var imageOrientationRawValue: Int
-    var scrollViewTransform: CGAffineTransform
-    var scrollViewCenter: CGPoint
-    var scrollViewBounds: CGRect
-    var scrollViewContentOffset: CGPoint
-    var scrollViewMinimumZoomScale: CGFloat
-    var scrollViewMaximumZoomScale: CGFloat
-    var scrollViewZoomScale: CGFloat
-    var cropBoxFrame: CGRect
-//    var aspectRatioLocked: Bool
-//    var currentAspectRatio: AspectRatio
-//    var currentAspectRatioValue: CGFloat
-    var photoTranslation: CGPoint
-    var imageViewTransform: CGAffineTransform
-    var imageViewBoundsSize: CGSize
+public struct CropperState: Codable, Equatable {
+    public var viewFrame: CGRect
+    public var angle: CGFloat
+    public var rotationAngle: CGFloat
+    public var straightenAngle: CGFloat
+    public var flipAngle: CGFloat
+    public var imageOrientationRawValue: Int
+    public var scrollViewTransform: CGAffineTransform
+    public var scrollViewCenter: CGPoint
+    public var scrollViewBounds: CGRect
+    public var scrollViewContentOffset: CGPoint
+    public var scrollViewMinimumZoomScale: CGFloat
+    public var scrollViewMaximumZoomScale: CGFloat
+    public var scrollViewZoomScale: CGFloat
+    public var cropBoxFrame: CGRect
+    public var aspectRatioLocked: Bool
+    public var aspectRatio: AspectRatio
+    public var aspectRatioValue: CGFloat
+    public var photoTranslation: CGPoint
+    public var imageViewTransform: CGAffineTransform
+    public var imageViewBoundsSize: CGSize
 }

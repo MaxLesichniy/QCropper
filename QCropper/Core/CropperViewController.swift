@@ -59,6 +59,7 @@ open class CropperViewController: UIViewController, Rotatable, StateRestorable, 
         }
     }
 
+    public var currentAspectRatio: AspectRatio = .original
     public var currentAspectRatioValue: CGFloat = 1.0
     public var isCropBoxPanEnabled: Bool = true
     public var cropContentInset: UIEdgeInsets = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
@@ -95,7 +96,7 @@ open class CropperViewController: UIViewController, Rotatable, StateRestorable, 
         return autoHorizontalOrVerticalAngle(straightenAngle + rotationAngle + flipAngle)
     }
 
-    lazy var scrollViewContainer: ScrollViewContainer = ScrollViewContainer(frame: self.view.bounds)
+    public internal(set) lazy var scrollViewContainer: ScrollViewContainer = ScrollViewContainer(frame: self.view.bounds)
 
     lazy var scrollView: UIScrollView = {
         let sv = UIScrollView(frame: CGRect(x: 0, y: 0, width: self.defaultCropBoxSize.width, height: self.defaultCropBoxSize.height))

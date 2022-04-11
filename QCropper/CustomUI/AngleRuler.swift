@@ -224,7 +224,7 @@ extension AngleRuler: UIScrollViewDelegate {
         }
         _value = value
         valueLabel.text = String(format: "%0.f", value)
-        midScaleLine.backgroundColor = QCropper.Config.highlightColor
+        midScaleLine.backgroundColor = QCropperConfig.highlightColor
         sendActions(for: .valueChanged)
     }
 

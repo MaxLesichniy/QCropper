@@ -59,17 +59,17 @@ extension UIImage {
     }
 
     private class func maxWidthForCropSize(_ cropSize: CGSize) -> CGFloat {
-        var maxWidth = QCropper.Config.croppingImageShortSideMaxSize
+        var maxWidth = QCropperConfig.croppingImageShortSideMaxSize
         if cropSize.width > cropSize.height {
-            maxWidth = QCropper.Config.croppingImageShortSideMaxSize * cropSize.width / cropSize.height
-            if maxWidth > QCropper.Config.croppingImageLongSideMaxSize {
-                maxWidth = QCropper.Config.croppingImageLongSideMaxSize
+            maxWidth = QCropperConfig.croppingImageShortSideMaxSize * cropSize.width / cropSize.height
+            if maxWidth > QCropperConfig.croppingImageLongSideMaxSize {
+                maxWidth = QCropperConfig.croppingImageLongSideMaxSize
             }
         } else {
-            maxWidth = QCropper.Config.croppingImageShortSideMaxSize
+            maxWidth = QCropperConfig.croppingImageShortSideMaxSize
             let height = maxWidth * cropSize.height / cropSize.width
-            if height > QCropper.Config.croppingImageLongSideMaxSize {
-                maxWidth = QCropper.Config.croppingImageLongSideMaxSize * cropSize.width / cropSize.height
+            if height > QCropperConfig.croppingImageLongSideMaxSize {
+                maxWidth = QCropperConfig.croppingImageLongSideMaxSize * cropSize.width / cropSize.height
             }
         }
         return maxWidth

@@ -12,6 +12,7 @@ public protocol AspectRatioSettable {
 }
 
 extension AspectRatioSettable where Self: CropperViewController {
+    
     public func setAspectRatio(_ aspectRatio: AspectRatio) {
         switch aspectRatio {
         case .original:
@@ -58,6 +59,8 @@ extension AspectRatioSettable where Self: CropperViewController {
             setAspectRatioValue(CGFloat(width) / CGFloat(height))
             aspectRatioLocked = true
         }
+        
+        currentAspectRatio = aspectRatio
     }
 
     public func setAspectRatioValue(_ aspectRatioValue: CGFloat) {
