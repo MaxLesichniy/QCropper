@@ -17,9 +17,9 @@ extension Rotatable where Self: CropperViewController {
         overlay.gridLinesAlpha = 1
         overlay.gridLinesCount = 8
 
-        UIView.animate(withDuration: 0.2, animations: {
+        UIView.animate(withDuration: 0.2) {
             self.overlay.blur = false
-        })
+        }
 
         straightenAngle = angle
         scrollView.transform = CGAffineTransform(rotationAngle: totalAngle)
@@ -50,8 +50,7 @@ extension Rotatable where Self: CropperViewController {
     }
 
     public func rotate90degrees(clockwise: Bool = true) {
-        topBar.isUserInteractionEnabled = false
-        bottomView.isUserInteractionEnabled = false
+        setBarsUserInteractionEnabled(false)
 
         guard let animationContainer = scrollView.superview else { return }
 
@@ -132,8 +131,7 @@ extension Rotatable where Self: CropperViewController {
             }, completion: { _ in
                 rotatingOverlay.isHidden = true
                 rotatingOverlay.removeFromSuperview()
-                self.topBar.isUserInteractionEnabled = true
-                self.bottomView.isUserInteractionEnabled = true
+                self.setBarsUserInteractionEnabled(true)
                 self.updateButtons()
             })
         })

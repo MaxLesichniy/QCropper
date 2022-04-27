@@ -7,13 +7,13 @@
 import UIKit
 
 public protocol AspectRatioSettable {
-    func setAspectRatio(_ aspectRatio: AspectRatio)
-    func setAspectRatioValue(_ aspectRatioValue: CGFloat)
+    func setAspectRatio(_ aspectRatio: AspectRatio, animated: Bool)
+    func setAspectRatioValue(_ aspectRatioValue: CGFloat, animated: Bool)
 }
 
 extension AspectRatioSettable where Self: CropperViewController {
     
-    public func setAspectRatio(_ aspectRatio: AspectRatio) {
+    public func setAspectRatio(_ aspectRatio: AspectRatio, animated: Bool = true) {
         switch aspectRatio {
         case .original:
             var width: CGFloat
@@ -39,14 +39,14 @@ extension AspectRatioSettable where Self: CropperViewController {
             } else {
                 aspectRatioPicker.selectedBox = .none
             }
-            setAspectRatioValue(width / height)
+            setAspectRatioValue(width / height, animated: animated)
             aspectRatioLocked = true
         case .freeForm:
             aspectRatioPicker.selectedBox = .none
             aspectRatioLocked = false
         case .square:
             aspectRatioPicker.selectedBox = .none
-            setAspectRatioValue(1)
+            setAspectRatioValue(1.0, animated: animated)
             aspectRatioLocked = true
         case let .ratio(width, height):
             if width > height {
@@ -56,28 +56,29 @@ extension AspectRatioSettable where Self: CropperViewController {
             } else {
                 aspectRatioPicker.selectedBox = .none
             }
-            setAspectRatioValue(CGFloat(width) / CGFloat(height))
+            setAspectRatioValue(CGFloat(width) / CGFloat(height), animated: animated)
             aspectRatioLocked = true
         }
         
         currentAspectRatio = aspectRatio
     }
 
-    public func setAspectRatioValue(_ aspectRatioValue: CGFloat) {
+    public func setAspectRatioValue(_ aspectRatioValue: CGFloat, animated: Bool = true) {
         guard aspectRatioValue > 0 else { return }
 
-        topBar.isUserInteractionEnabled = false
-        bottomView.isUserInteractionEnabled = false
+        setBarsUserInteractionEnabled(false)
         aspectRatioLocked = true
         currentAspectRatioValue = aspectRatioValue
 
         var targetCropBoxFrame: CGRect
         let height: CGFloat = maxCropRegion.size.width / aspectRatioValue
         if height <= maxCropRegion.size.height {
-            targetCropBoxFrame = CGRect(center: defaultCropBoxCenter, size: CGSize(width: maxCropRegion.size.width, height: height))
+            targetCropBoxFrame = CGRect(center: defaultCropBoxCenter,
+                                        size: CGSize(width: maxCropRegion.size.width, height: height))
         } else {
             let width = maxCropRegion.size.height * aspectRatioValue
-            targetCropBoxFrame = CGRect(center: defaultCropBoxCenter, size: CGSize(width: width, height: maxCropRegion.size.height))
+            targetCropBoxFrame = CGRect(center: defaultCropBoxCenter,
+                                        size: CGSize(width: width, height: maxCropRegion.size.height))
         }
         targetCropBoxFrame = safeCropBoxFrame(targetCropBoxFrame)
 
@@ -87,18 +88,26 @@ extension AspectRatioSettable where Self: CropperViewController {
         /// Make a fake cropBoxFrame to help calculate how much the image should be scaled.
         var contentBiggerThanCurrentTargetCropBoxFrame: CGRect
         if currentCropBoxFrame.size.width / currentCropBoxFrame.size.height > aspectRatioValue {
-            contentBiggerThanCurrentTargetCropBoxFrame = CGRect(center: defaultCropBoxCenter, size: CGSize(width: currentCropBoxFrame.size.width, height: currentCropBoxFrame.size.width / aspectRatioValue))
+            contentBiggerThanCurrentTargetCropBoxFrame = CGRect(center: defaultCropBoxCenter,
+                                                                size: CGSize(width: currentCropBoxFrame.size.width,
+                                                                             height: currentCropBoxFrame.size.width / aspectRatioValue))
         } else {
-            contentBiggerThanCurrentTargetCropBoxFrame = CGRect(center: defaultCropBoxCenter, size: CGSize(width: currentCropBoxFrame.size.height * aspectRatioValue, height: currentCropBoxFrame.size.height))
+            contentBiggerThanCurrentTargetCropBoxFrame = CGRect(center: defaultCropBoxCenter,
+                                                                size: CGSize(width: currentCropBoxFrame.size.height * aspectRatioValue,
+                                                                             height: currentCropBoxFrame.size.height))
         }
-        let extraZoomScale = max(targetCropBoxFrame.size.width / contentBiggerThanCurrentTargetCropBoxFrame.size.width, targetCropBoxFrame.size.height / contentBiggerThanCurrentTargetCropBoxFrame.size.height)
-
+        let extraZoomScale = max(targetCropBoxFrame.size.width / contentBiggerThanCurrentTargetCropBoxFrame.size.width,
+                                 targetCropBoxFrame.size.height / contentBiggerThanCurrentTargetCropBoxFrame.size.height)
+        
         overlay.gridLinesAlpha = 0
-
-        matchScrollViewAndCropView(animated: true, targetCropBoxFrame: targetCropBoxFrame, extraZoomScale: extraZoomScale, blurLayerAnimated: true, animations: nil, completion: {
-            self.topBar.isUserInteractionEnabled = true
-            self.bottomView.isUserInteractionEnabled = true
+        
+        matchScrollViewAndCropView(animated: animated,
+                                   targetCropBoxFrame: targetCropBoxFrame,
+                                   extraZoomScale: extraZoomScale,
+                                   blurLayerAnimated: true,
+                                   animations: nil) {
+            self.setBarsUserInteractionEnabled(true)
             self.updateButtons()
-        })
+        }
     }
 }
