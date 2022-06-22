@@ -7,11 +7,11 @@
 import UIKit
 
 extension CGRect {
-    public init(center: CGPoint, size: CGSize) {
+    init(center: CGPoint, size: CGSize) {
         self.init(x: center.x - size.width / 2.0, y: center.y - size.height / 2.0, width: size.width, height: size.height)
     }
 
-    public func isEqual(to other: CGRect, accuracy epsilon: CGFloat) -> Bool {
+    func isEqual(to other: CGRect, accuracy epsilon: CGFloat) -> Bool {
         return (abs(minX - other.minX) <= epsilon) &&
             (abs(minY - other.minY) <= epsilon) &&
             (abs(width - other.width) <= epsilon) &&

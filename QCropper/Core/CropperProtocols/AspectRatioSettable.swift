@@ -74,15 +74,17 @@ extension AspectRatioSettable where Self: CropperViewController {
         let height: CGFloat = maxCropRegion.size.width / aspectRatioValue
         if height <= maxCropRegion.size.height {
             targetCropBoxFrame = CGRect(center: defaultCropBoxCenter,
-                                        size: CGSize(width: maxCropRegion.size.width, height: height))
+                                        size: CGSize(width: maxCropRegion.size.width,
+                                                     height: height))
         } else {
             let width = maxCropRegion.size.height * aspectRatioValue
             targetCropBoxFrame = CGRect(center: defaultCropBoxCenter,
-                                        size: CGSize(width: width, height: maxCropRegion.size.height))
+                                        size: CGSize(width: width,
+                                                     height: maxCropRegion.size.height))
         }
         targetCropBoxFrame = safeCropBoxFrame(targetCropBoxFrame)
 
-        let currentCropBoxFrame = overlay.cropBoxFrame
+        let currentCropBoxFrame = cropBoxFrame
 
         /// The content of the image is getting bigger and bigger when switching the aspect ratio.
         /// Make a fake cropBoxFrame to help calculate how much the image should be scaled.

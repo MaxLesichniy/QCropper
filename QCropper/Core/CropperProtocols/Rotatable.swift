@@ -12,6 +12,7 @@ public protocol Rotatable {
 }
 
 extension Rotatable where Self: CropperViewController {
+    
     public func setStraightenAngle(_ angle: CGFloat) {
         overlay.cropBoxFrame = overlay.cropBoxFrame
         overlay.gridLinesAlpha = 1
@@ -24,20 +25,20 @@ extension Rotatable where Self: CropperViewController {
         straightenAngle = angle
         scrollView.transform = CGAffineTransform(rotationAngle: totalAngle)
 
-        let rect = overlay.cropBoxFrame
-        let rotatedRect = rect.applying(CGAffineTransform(rotationAngle: totalAngle))
-        let width = rotatedRect.size.width
-        let height = rotatedRect.size.height
+        let rotatedRectSize = cropBoxFrame.applying(CGAffineTransform(rotationAngle: totalAngle)).size
+
         let center = scrollView.center
 
         let contentOffset = scrollView.contentOffset
-        let contentOffsetCenter = CGPoint(x: contentOffset.x + scrollView.bounds.size.width / 2, y: contentOffset.y + scrollView.bounds.size.height / 2)
-        scrollView.bounds = CGRect(x: 0, y: 0, width: width, height: height)
-        let newContentOffset = CGPoint(x: contentOffsetCenter.x - scrollView.bounds.size.width / 2, y: contentOffsetCenter.y - scrollView.bounds.size.height / 2)
+        let contentOffsetCenter = CGPoint(x: contentOffset.x + scrollView.bounds.width / 2,
+                                          y: contentOffset.y + scrollView.bounds.height / 2)
+        scrollView.bounds = CGRect(origin: .zero, size: rotatedRectSize)
+        let newContentOffset = CGPoint(x: contentOffsetCenter.x - scrollView.bounds.width / 2,
+                                       y: contentOffsetCenter.y - scrollView.bounds.height / 2)
         scrollView.contentOffset = newContentOffset
         scrollView.center = center
 
-        let shouldScale: Bool = scrollView.contentSize.width / scrollView.bounds.size.width <= 1.0 || scrollView.contentSize.height / scrollView.bounds.size.height <= 1.0
+        let shouldScale: Bool = scrollView.contentSize.width / scrollView.bounds.width <= 1.0 || scrollView.contentSize.height / scrollView.bounds.height <= 1.0
         if !manualZoomed || shouldScale {
             scrollView.minimumZoomScale = scrollViewZoomScaleToBounds()
             scrollView.setZoomScale(scrollViewZoomScaleToBounds(), animated: false)
@@ -55,7 +56,7 @@ extension Rotatable where Self: CropperViewController {
         guard let animationContainer = scrollView.superview else { return }
 
         // Make sure to cover the entire screen while rotating
-        let scale = max(maxCropRegion.size.width / overlay.cropBoxFrame.size.width, maxCropRegion.size.height / overlay.cropBoxFrame.size.height)
+        let scale = max(maxCropRegion.width / cropBoxFrame.width, maxCropRegion.height / cropBoxFrame.height)
         let frame = animationContainer.bounds.insetBy(dx: -animationContainer.width * scale * 3, dy: -animationContainer.height * scale * 3)
 
         let rotatingOverlay = Overlay(frame: frame)
@@ -64,7 +65,7 @@ extension Rotatable where Self: CropperViewController {
         rotatingOverlay.cropBoxAlpha = 0
         animationContainer.addSubview(rotatingOverlay)
 
-        let rotatingCropBoxFrame = rotatingOverlay.convert(overlay.cropBoxFrame, from: backgroundView)
+        let rotatingCropBoxFrame = rotatingOverlay.convert(cropBoxFrame, from: backgroundView)
         rotatingOverlay.cropBoxFrame = rotatingCropBoxFrame
         rotatingOverlay.transform = .identity
         rotatingOverlay.layer.anchorPoint = CGPoint(x: rotatingCropBoxFrame.midX / rotatingOverlay.size.width,
@@ -85,7 +86,7 @@ extension Rotatable where Self: CropperViewController {
             // position scroll view
             let scrollViewCenter = self.scrollView.center
             let cropBoxCenter = self.defaultCropBoxCenter
-            let r = self.overlay.cropBoxFrame
+            let r = self.cropBoxFrame
             var rect: CGRect = .zero
 
             let scaleX = self.maxCropRegion.size.width / r.size.height
@@ -116,8 +117,8 @@ extension Rotatable where Self: CropperViewController {
             let zoomScale = self.scrollView.zoomScale * scale
             self.willSetScrollViewZoomScale(zoomScale)
             self.scrollView.zoomScale = zoomScale
-            let newContentOffset = CGPoint(x: showingContentNormalizedCenter.x * self.imageView.width - self.scrollView.bounds.size.width * 0.5,
-                                           y: showingContentNormalizedCenter.y * self.imageView.height - self.scrollView.bounds.size.height * 0.5)
+            let newContentOffset = CGPoint(x: showingContentNormalizedCenter.x * self.imageView.width - self.scrollView.bounds.width * 0.5,
+                                           y: showingContentNormalizedCenter.y * self.imageView.height - self.scrollView.bounds.height * 0.5)
             self.scrollView.contentOffset = self.safeContentOffsetForScrollView(newContentOffset)
             self.scrollView.center = scrollViewCenter
         }, completion: { _ in

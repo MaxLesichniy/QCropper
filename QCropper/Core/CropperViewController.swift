@@ -121,7 +121,7 @@ open class CropperViewController: UIViewController, Rotatable, StateRestorable, 
         return sv
     }()
 
-    lazy var imageView: UIImageView = {
+    public fileprivate(set) lazy var imageView: UIImageView = {
         let iv = UIImageView(image: self.originalImage)
         iv.backgroundColor = .clear
         return iv
@@ -194,7 +194,8 @@ open class CropperViewController: UIViewController, Rotatable, StateRestorable, 
 
     @objc
     func angleRulerValueChanged(_: AnyObject) {
-        setBarsUserInteractionEnabled(false)
+        toolbar.isUserInteractionEnabled = false
+        topBar.isUserInteractionEnabled = false
         scrollViewContainer.isUserInteractionEnabled = false
         setStraightenAngle(CGFloat(angleRuler.value * CGFloat.pi / 180.0))
     }
@@ -205,7 +206,8 @@ open class CropperViewController: UIViewController, Rotatable, StateRestorable, 
             self.overlay.gridLinesAlpha = 0
             self.overlay.blur = true
         } completion: { _ in
-            self.setBarsUserInteractionEnabled(true)
+            self.toolbar.isUserInteractionEnabled = true
+            self.topBar.isUserInteractionEnabled = true
             self.scrollViewContainer.isUserInteractionEnabled = true
             self.overlay.gridLinesCount = 2
         }
@@ -309,7 +311,7 @@ open class CropperViewController: UIViewController, Rotatable, StateRestorable, 
         if pan.state == .began {
             cancelStasis()
             panBeginningPoint = point
-            panBeginningCropBoxFrame = overlay.cropBoxFrame
+            panBeginningCropBoxFrame = cropBoxFrame
             panBeginningCropBoxEdge = nearestCropBoxEdgeForPoint(point: panBeginningPoint)
             overlay.blur = false
             overlay.gridLinesAlpha = 1
@@ -319,8 +321,6 @@ open class CropperViewController: UIViewController, Rotatable, StateRestorable, 
         if pan.state == .ended || pan.state == .cancelled {
             stasisAndThenRun {
                 self.matchScrollViewAndCropView(animated: true,
-                                                targetCropBoxFrame: self.overlay.cropBoxFrame,
-                                                extraZoomScale: 1,
                                                 blurLayerAnimated: true) {
                     self.overlay.gridLinesAlpha = 0
                     self.overlay.blur = true
@@ -415,14 +415,14 @@ open class CropperViewController: UIViewController, Rotatable, StateRestorable, 
                                y: cropRegionInsets.top,
                                width: view.width - cropRegionInsets.left - cropRegionInsets.right,
                                height: view.height - cropRegionInsets.top - cropRegionInsets.bottom)
-        defaultCropBoxCenter = CGPoint(x: view.width / 2.0, y: cropRegionInsets.top + maxCropRegion.size.height / 2.0)
+        defaultCropBoxCenter = CGPoint(x: view.width / 2.0,
+                                       y: cropRegionInsets.top + maxCropRegion.size.height / 2.0)
         defaultCropBoxSize = {
-            var size: CGSize
             let scaleW = self.originalImage.size.width / self.maxCropRegion.size.width
             let scaleH = self.originalImage.size.height / self.maxCropRegion.size.height
             let scale = max(scaleW, scaleH)
-            size = CGSize(width: self.originalImage.size.width / scale, height: self.originalImage.size.height / scale)
-            return size
+            return CGSize(width: self.originalImage.size.width / scale,
+                          height: self.originalImage.size.height / scale)
         }()
 
         backgroundView.frame = view.bounds
@@ -476,7 +476,7 @@ open class CropperViewController: UIViewController, Rotatable, StateRestorable, 
         defaultCropperState = saveState()
 
         angleRuler.value = 0
-        if overlay.cropBoxFrame.size.width > overlay.cropBoxFrame.size.height {
+        if cropBoxFrame.size.width > cropBoxFrame.size.height {
             aspectRatioPicker.aspectRatios = verticalAspectRatios.map { $0.rotated }
         } else {
             aspectRatioPicker.aspectRatios = verticalAspectRatios
@@ -498,7 +498,7 @@ open class CropperViewController: UIViewController, Rotatable, StateRestorable, 
     }
     
     func setBarsUserInteractionEnabled(_ isEnabled: Bool) {
-        toolbar.isUserInteractionEnabled = isEnabled
+        bottomView.isUserInteractionEnabled = isEnabled
         topBar.isUserInteractionEnabled = isEnabled
     }
     
@@ -524,12 +524,8 @@ open class CropperViewController: UIViewController, Rotatable, StateRestorable, 
 
     func photoTranslation() -> CGPoint {
         let rect = imageView.convert(imageView.bounds, to: view)
-        let point = CGPoint(x: rect.origin.x + rect.size.width / 2,
-                            y: rect.origin.y + rect.size.height / 2)
-        let zeroPoint = CGPoint(x: view.frame.width / 2,
-                                y: defaultCropBoxCenter.y)
-        return CGPoint(x: point.x - zeroPoint.x,
-                       y: point.y - zeroPoint.y)
+        return CGPoint(x: rect.midX - defaultCropBoxCenter.x,
+                       y: rect.midY - defaultCropBoxCenter.y)
     }
 
     public static let overlayCropBoxFramePlaceholder: CGRect = .zero
@@ -542,7 +538,7 @@ open class CropperViewController: UIViewController, Rotatable, StateRestorable, 
                                     completion: (() -> Void)? = nil) {
         var targetCropBoxFrame = targetCropBoxFrame
         if targetCropBoxFrame.equalTo(CropperViewController.overlayCropBoxFramePlaceholder) {
-            targetCropBoxFrame = overlay.cropBoxFrame
+            targetCropBoxFrame = cropBoxFrame
         }
 
         let scaleX = maxCropRegion.size.width / targetCropBoxFrame.size.width
@@ -551,7 +547,9 @@ open class CropperViewController: UIViewController, Rotatable, StateRestorable, 
         let scale = min(scaleX, scaleY)
 
         // calculate the new bounds of crop view
-        let newCropBounds = CGRect(x: 0, y: 0, width: scale * targetCropBoxFrame.size.width, height: scale * targetCropBoxFrame.size.height)
+        let newCropBounds = CGRect(x: 0, y: 0,
+                                   width: scale * targetCropBoxFrame.size.width,
+                                   height: scale * targetCropBoxFrame.size.height)
 
         // calculate the new bounds of scroll view
         let rotatedRect = newCropBounds.applying(CGAffineTransform(rotationAngle: totalAngle))
@@ -561,8 +559,10 @@ open class CropperViewController: UIViewController, Rotatable, StateRestorable, 
         let cropBoxFrameBeforeZoom = targetCropBoxFrame
 
         let zoomRect = view.convert(cropBoxFrameBeforeZoom, to: imageView) // zoomRect is base on imageView when scrollView.zoomScale = 1
-        let center = CGPoint(x: zoomRect.origin.x + zoomRect.size.width / 2, y: zoomRect.origin.y + zoomRect.size.height / 2)
-        let normalizedCenter = CGPoint(x: center.x / (imageView.width / scrollView.zoomScale), y: center.y / (imageView.height / scrollView.zoomScale))
+        let center = CGPoint(x: zoomRect.origin.x + zoomRect.size.width / 2,
+                             y: zoomRect.origin.y + zoomRect.size.height / 2)
+        let normalizedCenter = CGPoint(x: center.x / (imageView.width / scrollView.zoomScale),
+                                       y: center.y / (imageView.height / scrollView.zoomScale))
 
         UIView.animate(withDuration: animated ? 0.25 : 0) {
             self.overlay.setCropBoxFrame(CGRect(center: self.defaultCropBoxCenter, size: newCropBounds.size), blurLayerAnimated: blurLayerAnimated)
@@ -581,8 +581,8 @@ open class CropperViewController: UIViewController, Rotatable, StateRestorable, 
 
             self.scrollView.zoomScale = zoomScale
 
-            let contentOffset = CGPoint(x: normalizedCenter.x * self.imageView.width - self.scrollView.bounds.size.width * 0.5,
-                                        y: normalizedCenter.y * self.imageView.height - self.scrollView.bounds.size.height * 0.5)
+            let contentOffset = CGPoint(x: normalizedCenter.x * self.imageView.width - self.scrollView.bounds.width * 0.5,
+                                        y: normalizedCenter.y * self.imageView.height - self.scrollView.bounds.height * 0.5)
             self.scrollView.contentOffset = self.safeContentOffsetForScrollView(contentOffset)
         } completion: { _ in
             completion?()
@@ -680,8 +680,7 @@ extension CropperViewController: UIScrollViewDelegate {
         cancelStasis()
         overlay.blur = false
         overlay.gridLinesAlpha = 1
-        topBar.isUserInteractionEnabled = false
-        bottomView.isUserInteractionEnabled = false
+        setBarsUserInteractionEnabled(false)
     }
 
     public func scrollViewDidEndDragging(_: UIScrollView, willDecelerate decelerate: Bool) {
@@ -726,7 +725,7 @@ extension CropperViewController: UIGestureRecognizerDelegate {
             }
             let tapPoint = gestureRecognizer.location(in: view)
 
-            let frame = overlay.cropBoxFrame
+            let frame = cropBoxFrame
 
             let d = cropBoxHotArea / 2.0
             let innerFrame = frame.insetBy(dx: d, dy: d)
@@ -753,3 +752,60 @@ extension CropperViewController: AspectRatioPickerDelegate {
 // MARK: Add capability from protocols
 
 extension CropperViewController: Stasisable, AngleAssist, CropBoxEdgeDraggable, AspectRatioSettable {}
+
+extension CropperViewController {
+    
+    public func setCropBox(_ cropBox: CGRect, straightenAngle: CGFloat) {
+        view.layoutIfNeeded()
+        
+        let cropBox = cropBox.applying(CGAffineTransform(scaleX: 1, y: -1)
+            .translatedBy(x: 0, y: -originalImage.size.height))
+        let rotatedImageFrame = CGRect(origin: .zero, size: originalImage.size)
+//            .applying(CGAffineTransform(rotationAngle: straightenAngle))
+        let translation = CGPoint(x: rotatedImageFrame.midX - cropBox.midX,
+                                  y: rotatedImageFrame.midY - cropBox.midY)
+        
+        
+        setStraightenAngle(straightenAngle)
+        
+        let rotatedSize = imageView.bounds.applying(CGAffineTransform(rotationAngle: straightenAngle)).size
+
+        let uiScale = imageView.bounds.width / originalImage.size.width * (rotatedSize.width / imageView.bounds.width)
+
+        let cropBoxFrame: CGRect
+        
+        let cropSizeAspect = cropBox.height / cropBox.width
+        if cropBox.width < cropBox.height {
+            let h = uiScale * cropBox.height
+            cropBoxFrame = CGRect(center: defaultCropBoxCenter,
+                                  size: CGSize(width: h / cropSizeAspect,
+                                               height: h))
+        } else {
+            let w = uiScale * cropBox.width
+            cropBoxFrame = CGRect(center: defaultCropBoxCenter,
+                                  size: CGSize(width: w,
+                                               height: w * cropSizeAspect))
+        }
+
+        matchScrollViewAndCropView(targetCropBoxFrame: cropBoxFrame, blurLayerAnimated: true)
+        
+//        let tra = CGPoint(x: cropBox.origin.x / originalImage.size.width * (imageView.bounds.width / scrollView.bounds.width),
+//                          y: cropBox.origin.y / originalImage.size.height * (imageView.bounds.height / scrollView.bounds.height))
+//            .applying(CGAffineTransform(rotationAngle: straightenAngle))
+//        let tra = CGPoint(x: translation.x * uiScale,
+//                          y: translation.y * uiScale)
+        
+        let scl = scrollView.contentSize.width / originalImage.size.width
+        let r = scrollView.bounds.applying(CGAffineTransform(rotationAngle: straightenAngle))
+        let p2 = CGPoint(x: (scrollView.bounds.width - imageView.bounds.width) / 2,
+                         y: (scrollView.bounds.height - imageView.bounds.height) / 2)
+        let contentOffset = CGPoint(x: (scrollView.contentSize.width - r.width) / 2 - translation.x * scl,
+                                    y: (scrollView.contentSize.height - r.height) / 2 - translation.y * scl)
+        //CGPoint(x: tra.x * scrollView.contentSize.width,
+                              //      y: tra.y * scrollView.contentSize.height)
+        
+        scrollView.contentOffset = safeContentOffsetForScrollView(contentOffset)
+
+    }
+    
+}

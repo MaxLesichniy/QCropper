@@ -14,7 +14,7 @@ protocol CropBoxEdgeDraggable {
 extension CropBoxEdgeDraggable where Self: CropperViewController {
 
     func nearestCropBoxEdgeForPoint(point: CGPoint) -> CropBoxEdge {
-        var frame = overlay.cropBoxFrame
+        var frame = cropBoxFrame
 
         frame = frame.insetBy(dx: -cropBoxHotArea / 2.0, dy: -cropBoxHotArea / 2.0)
 
@@ -69,7 +69,7 @@ extension CropBoxEdgeDraggable where Self: CropperViewController {
 
     func updateCropBoxFrameWithPanGesturePoint(_ point: CGPoint) {
         var point = point
-        var frame = overlay.cropBoxFrame
+        var frame = cropBoxFrame
         let originFrame = panBeginningCropBoxFrame
         let contentFrame = maxCropRegion
 

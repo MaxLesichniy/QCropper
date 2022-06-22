@@ -30,7 +30,7 @@ extension StateRestorable where Self: CropperViewController {
             state.scrollViewMinimumZoomScale.isEqual(to: scrollView.minimumZoomScale, accuracy: epsilon),
             state.scrollViewMaximumZoomScale.isEqual(to: scrollView.maximumZoomScale, accuracy: epsilon),
             state.scrollViewZoomScale.isEqual(to: scrollView.zoomScale, accuracy: epsilon),
-            state.cropBoxFrame.isEqual(to: overlay.cropBoxFrame, accuracy: epsilon) {
+            state.cropBoxFrame.isEqual(to: cropBoxFrame, accuracy: epsilon) {
             return true
         }
 
@@ -51,7 +51,7 @@ extension StateRestorable where Self: CropperViewController {
                               scrollViewMinimumZoomScale: scrollView.minimumZoomScale,
                               scrollViewMaximumZoomScale: scrollView.maximumZoomScale,
                               scrollViewZoomScale: scrollView.zoomScale,
-                              cropBoxFrame: overlay.cropBoxFrame,
+                              cropBoxFrame: cropBoxFrame,
                               aspectRatioLocked: aspectRatioLocked,
                               aspectRatio: currentAspectRatio,
                               aspectRatioValue: currentAspectRatioValue,
@@ -80,7 +80,7 @@ extension StateRestorable where Self: CropperViewController {
             self.scrollView.contentOffset = state.scrollViewContentOffset
             self.scrollView.center = state.scrollViewCenter
             self.overlay.cropBoxFrame = state.cropBoxFrame
-            if self.overlay.cropBoxFrame.size.width > self.overlay.cropBoxFrame.size.height {
+            if self.cropBoxFrame.size.width > self.cropBoxFrame.size.height {
                 self.aspectRatioPicker.aspectRatios = self.verticalAspectRatios
             } else {
                 self.aspectRatioPicker.aspectRatios = self.verticalAspectRatios.map { $0.rotated }
