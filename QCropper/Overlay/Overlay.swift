@@ -41,12 +41,18 @@ open class Overlay: UIView {
     public var blur: Bool = true {
         didSet {
             if blur, isBlurEnabled {
-                translucentMaskView.effect = UIBlurEffect(style: .dark)
+                translucentMaskView.effect = blurEffect
                 translucentMaskView.backgroundColor = .clear
             } else {
                 translucentMaskView.effect = nil
                 translucentMaskView.backgroundColor = maskColor
             }
+        }
+    }
+    
+    public var blurEffect: UIBlurEffect = UIBlurEffect(style: .dark) {
+        didSet {
+            translucentMaskView.effect = blurEffect
         }
     }
 
@@ -87,7 +93,7 @@ open class Overlay: UIView {
     public var cropBox = CropBox(frame: .zero)
 
     public lazy var translucentMaskView: UIVisualEffectView = {
-        let vev = UIVisualEffectView(effect: UIBlurEffect(style: .dark))
+        let vev = UIVisualEffectView(effect: blurEffect)
         vev.backgroundColor = .clear
         vev.isUserInteractionEnabled = false
         return vev
@@ -135,7 +141,6 @@ open class Overlay: UIView {
             let center = UIBezierPath(roundedRect: cropBox.frame, cornerRadius: min(cropBox.width, cropBox.height) / 2)
             bezierPath.append(center)
         } else {
-            print(cropBox.frame)
             let center = UIBezierPath(rect: cropBox.frame)
             bezierPath.append(center)
         }
